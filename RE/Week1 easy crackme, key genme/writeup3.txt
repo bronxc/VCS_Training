@@ -1,0 +1,65 @@
+Python 2.7.13 (v2.7.13:a06454b1afa1, Dec 17 2016, 20:53:40) [MSC v.1500 64 bit (AMD64)] on win32
+Type "help", "copyright", "credits" or "license" for more information.
+>>> f = open("./inside-the-mind-of-a-hacker-memory.bmp","rb")
+>>> data = f.read()
+>>> len(data)
+1633334
+>>> import struct
+>>> struct.unpack("<H",data[6:8])
+(240,)
+>>> data[6:8]
+'\xf0\x00'
+>>> 0x00f0
+240
+>>> 240/8
+30
+>>> struct.unpack("<I",data[10:14])[0]
+54
+>>> struct.unpack("<I",data[10:14])
+(54,)
+>>> struct.unpack("<I",data[10:14])[0]
+54
+>>> struct.unpack("<I",data[10:14])[0]
+54
+>>> data_image = data[struct.unpack("<I",data[10:14])[0]:]
+>>> flag = []
+>>> for i in xrange(0,240,1):
+...
+...
+  File "<stdin>", line 3
+
+    ^
+IndentationError: expected an indented block
+>>> v3 = 0
+>>> for i in xrange(0,240,1):
+...     flag+=[data_image[v3*3]]
+...     v3 = v3 + 1
+...
+>>> len(flag)
+240
+>>> flag[0]
+'\x00'
+>>> flag[1]
+'\x01'
+>>> flag[2]
+'\x01'
+>>> flag[3]
+'\x00'
+>>> for i in range(0,len(flag)):
+...     flag[i] = ord(flag[i])
+...
+>>> flag[0]
+0
+>>> for i in range(0,240,8):
+... for i in range(0,240,8):
+  File "<stdin>", line 2
+    for i in range(0,240,8):
+      ^
+IndentationError: expected an indented block
+>>>
+>>> string = ""
+>>> for i in range(0,240,8):
+...     string += chr((flag[i+7] << 7) + (flag[i+6] << 6) + (flag[i+5] << 5) + (flag[i+4] << 4) + (flag[i+3] << 3) + (flag[i+2] << 2) + (flag[i+1] << 1) + flag[i])
+...
+>>> string
+'flag{dont_forget_the_treasure}'

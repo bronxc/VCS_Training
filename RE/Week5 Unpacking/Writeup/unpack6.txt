@@ -1,0 +1,36 @@
+
+var $count
+mov $count, 0
+bp VirtualFree+6
+
+loop:
+inc $count
+log {0}, $count
+erun
+cmp [401000], "8BEC8B55"
+je endloop
+jmp loop
+
+
+endloop:
+bc
+bph 401000
+erun
+bphc
+
+
+find cip, "E8????????E9"
+log {0}, $result
+msg "wait me"
+
+cmt $result, "OEP"
+bp $result
+
+
+//erun
+
+
+//bc
+//bphc
+
+ret

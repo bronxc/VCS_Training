@@ -1,0 +1,192 @@
+91
+452
+444
+445
+453
+131
+132
+
+
+00BA395B   | 0FB642 02            | movzx eax,byte ptr ds:[edx+2]                       |
+00BA395F   | C0C0 02              | rol al,2                                            |
+00BA3962   | 0FB6F0               | movzx esi,al                                        |
+00BA3965   | 0FB602               | movzx eax,byte ptr ds:[edx]                         |
+00BA3968   | 04 12                | add al,12                                           |
+00BA396A   | 0FB6C8               | movzx ecx,al                                        |
+00BA396D   | 0FB642 01            | movzx eax,byte ptr ds:[edx+1]                       |
+00BA3971   | 2C 78                | sub al,78                                           |
+00BA3973   | C1E1 08              | shl ecx,8                                           |
+00BA3976   | 0FB6C0               | movzx eax,al                                        |
+00BA3979   | 0BC8                 | or ecx,eax                                          |
+00BA397B   | 0FB642 03            | movzx eax,byte ptr ds:[edx+3]                       |
+00BA397F   | C1E1 08              | shl ecx,8                                           |
+00BA3982   | 0BF1                 | or esi,ecx                                          |
+00BA3984   | C0C8 04              | ror al,4                                            |
+00BA3987   | C1E6 08              | shl esi,8                                           |
+00BA398A   | 0FB6C0               | movzx eax,al                                        |
+00BA398D   | 0BF0                 | or esi,eax                                          |
+00BA398F   | B8 01000000          | mov eax,1                                           |
+00BA3994   | 89341F               | mov dword ptr ds:[edi+ebx],esi                      |
+
+
+rol in[2], 2				//buf[2]
+add in[0], 12 //+18			//buf[0]
+sub in[1], 78 //120
+
+//49 - 120 = 185; 120 - 49 = 71 => 0 - 71 => 255 - 70 = 185
+
+shl buf[0], 8 		=> *2^8 (0000ab => 00ab00)
+
+or buf[0], buf[1] 	//buf[0] += buf[1]
+shl buf[0], 8
+or buf[2], buf[0] 	//buf[2] += buf[0]
+
+ror in[3], 4 		=> (ab => ba //hex)
+shl buf[2], 8
+or buf[2], buf[3]
+
+/// dword ptr ds:[edi+ebx*1]=[0141AFBC "3È¹B†"]=42B9C833
+/// edi=0151ABF0	// out[0]
+/// dword ptr ds:[edi+ebx*1]=[0151AFE8 "sØ½F\rð­º««««««««"]=46BDD873
+/// dword ptr ds:[edi+ebx*1]=[0151AFE4]=4AC18526
+
+
+
+/// out[0] = buf[0]-buf[1]-buf[2]-buf[3]
+/// buf[0] = in[0] + 12h 	//18
+	buf[1] = in[1] - 78h	//120
+	buf[2] = in[2] * 4
+	buf[3] = swap(ab)
+	
+	
+in[0] - in[4] - in[8]
+in[1] - in[5] - in[9]
+in[2] - in[6] - in[10]
+in[3] - in[7] - in[11]
+
+
+
+00BA32C0   | 55                   | push ebp                                            |
+00BA32C1   | 8BEC                 | mov ebp,esp                                         |
+00BA32C3   | 8B55 08              | mov edx,dword ptr ss:[ebp+8]                        |
+00BA32C6   | 8B4A 14              | mov ecx,dword ptr ds:[edx+14]                       | ecx:"þÊ¾º3È¹B†"
+00BA32C9   | 8D41 08              | lea eax,dword ptr ds:[ecx+8]                        |
+00BA32CC   | 3B82 94000000        | cmp eax,dword ptr ds:[edx+94]                       |
+00BA32D2   | 77 36                | ja crackme.BA330A                                   |
+00BA32D4   | 038A 88000000        | add ecx,dword ptr ds:[edx+88]                       | ecx:"þÊ¾º3È¹B†"
+00BA32DA   | 8B01                 | mov eax,dword ptr ds:[ecx]                          | ecx:"þÊ¾º3È¹B†"
+
+00BA32DC   | 0141 04              | add dword ptr ds:[ecx+4],eax                        | ecx+4:"3È¹B†"
+
+00BA32DF   | 8B4A 14              | mov ecx,dword ptr ds:[edx+14]                       | ecx:"þÊ¾º3È¹B†"
+00BA32E2   | 8B82 88000000        | mov eax,dword ptr ds:[edx+88]                       |
+00BA32E8   | 837C01 04 00         | cmp dword ptr ds:[ecx+eax+4],0                      |
+00BA32ED   | 75 11                | jne crackme.BA3300                                  |
+00BA32EF   | 834A 10 02           | or dword ptr ds:[edx+10],2                          |
+00BA32F3   | 8D41 04              | lea eax,dword ptr ds:[ecx+4]                        | ecx+4:"3È¹B†"
+00BA32F6   | 8942 14              | mov dword ptr ds:[edx+14],eax                       |
+00BA32F9   | B8 01000000          | mov eax,1                                           |
+00BA32FE   | 5D                   | pop ebp                                             |
+00BA32FF   | C3                   | ret                                                 |
+00BA3300   | 8362 10 FD           | and dword ptr ds:[edx+10],FFFFFFFD                  |
+00BA3304   | 8D41 04              | lea eax,dword ptr ds:[ecx+4]                        | ecx+4:"3È¹B†"
+00BA3307   | 8942 14              | mov dword ptr ds:[edx+14],eax                       |
+00BA330A   | B8 01000000          | mov eax,1                                           |
+00BA330F   | 5D                   | pop ebp                                             |
+00BA3310   | C3                   | ret                                                 |
+
+in: ab012345678 //61 62 30 31 32 33 34 35 36 37 38 39
+=> 73 
+98 - 120 = ? 120 - 98 = 22 => 0 - 22 => 255 - 21 = 234
+eax=BABECAFE + xxxxxxxx = 11 8b a9 2e	//294365486 //782863121
+x + y + 1 = 0 + z = t
+
+xxxxxxxx = 56CCDE30 ? 73EAC013
+/// out[0] += eax			// eax=BABECAFE //3133065982
+/// 4294967295 - 3133065982 = 1161901313 => 1161901314 => 45413502 => 33 ??  
+/// FFFFFFFF - BABECAFE = 45413501 => 45 41 35 02 => 69 65 53 02
+/// 65 + 120 = 185
+
+cmp out[0], 0
+
+00101110101010011000101100010001
+10101010011000101100010001001011
+
+
+00BA34F0   | 55                   | push ebp                                            |
+00BA34F1   | 8BEC                 | mov ebp,esp                                         |
+00BA34F3   | 8B55 08              | mov edx,dword ptr ss:[ebp+8]                        |
+00BA34F6   | 8B4A 14              | mov ecx,dword ptr ds:[edx+14]                       |
+00BA34F9   | 8D41 08              | lea eax,dword ptr ds:[ecx+8]                        |
+00BA34FC   | 3B82 94000000        | cmp eax,dword ptr ds:[edx+94]                       |
+00BA3502   | 77 4E                | ja crackme.BA3552                                   |
+00BA3504   | 8B82 88000000        | mov eax,dword ptr ds:[edx+88]                       |
+00BA350A   | 56                   | push esi                                            |
+00BA350B   | 8D3401               | lea esi,dword ptr ds:[ecx+eax]                      |
+00BA350E   | 8A46 04              | mov al,byte ptr ds:[esi+4]                          |
+00BA3511   | 0FB6C8               | movzx ecx,al                                        |
+00BA3514   | 83E1 0F              | and ecx,F                                           |
+00BA3517   | 84C0                 | test al,al                                          |
+00BA3519   | 8B06                 | mov eax,dword ptr ds:[esi]                          |
+00BA351B   | 79 04                | jns crackme.BA3521                                  |
+00BA351D   | D3C0                 | rol eax,cl                                          |
+00BA351F   | EB 02                | jmp crackme.BA3523                                  |
+00BA3521   | D3C8                 | ror eax,cl                                          |
+00BA3523   | 8946 04              | mov dword ptr ds:[esi+4],eax                        |
+00BA3526   | 8B4A 14              | mov ecx,dword ptr ds:[edx+14]                       |
+00BA3529   | 8B82 88000000        | mov eax,dword ptr ds:[edx+88]                       |
+00BA352F   | 5E                   | pop esi                                             |
+00BA3530   | 837C01 04 00         | cmp dword ptr ds:[ecx+eax+4],0                      |
+00BA3535   | 75 11                | jne crackme.BA3548                                  |
+00BA3537   | 834A 10 02           | or dword ptr ds:[edx+10],2                          |
+00BA353B   | 8D41 04              | lea eax,dword ptr ds:[ecx+4]                        |
+00BA353E   | 8942 14              | mov dword ptr ds:[edx+14],eax                       |
+00BA3541   | B8 01000000          | mov eax,1                                           |
+00BA3546   | 5D                   | pop ebp                                             |
+00BA3547   | C3                   | ret                                                 |
+00BA3548   | 8362 10 FD           | and dword ptr ds:[edx+10],FFFFFFFD                  |
+00BA354C   | 8D41 04              | lea eax,dword ptr ds:[ecx+4]                        |
+00BA354F   | 8942 14              | mov dword ptr ds:[edx+14],eax                       |
+00BA3552   | B8 01000000          | mov eax,1                                           |
+00BA3557   | 5D                   | pop ebp                                             |
+00BA3558   | C3                   | ret                                                 |
+
+// dword ptr ds:[edi+ebx*1]=[01279FF4]= 	73EAC013
+// dword ptr ds:[ecx+4]=[01279FF4]=			2EA98B11
+// dword ptr ds:[esi+4]=[01279FF8]=			AA62C44B
+// eax=1337133	[smt]
+smt - out[0]  //AA62C44B
+// eax=68D44EEC => out[0]
+cmp out[0], 0
+
+xor out[0], smt
+// dword ptr ds:[ecx+4]=[006ED268 "Û]ã{\rð­º««««««««"]=7BE35DDB
+cmp out[0], 0
+
+smt = eax=2648ED87
+cmp smt, out[0]
+
+
+smt = 02
+
+/// out[0] = buf[0]-buf[1]-buf[2]-buf[3]
+/// buf[0] = in[0] + 12h 	//18
+	buf[1] = in[1] - 78h	//120
+	buf[2] = in[2] * 4
+	buf[3] = swap(ab)
+	
+out[0] += BABECAFE
+rol out[0], 6
+cmp out[0], 0
+
+11111111111111111111111111111111
+11011001101101111101010001111111
+
+11111111011001101101111101010001
+FF66DF51 4284931921 - 3133065982 = 1151865939 44a81453  68 168 20 83
+=> 50 32   => 32 20 05 
+
+
+smt = 94c3e659
+smt - out[1] = out[1]
+cmp out[1], smt

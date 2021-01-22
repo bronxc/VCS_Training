@@ -1,0 +1,10 @@
+------------------------------------------------------------
+ImageBase 00890000 ImageSize 00480000 IATAddress 0089C124 IATSize 0x4
+0001 AddrVA 00BC6402 Type JMP Value 776F1AB0 IatRefPointer 0089C128 Api user32.dll ReplyMessage
+------------------------------------------------------------
+Relocation direct imports fix: Base RVA 00480000 Type HIGHLOW Offset 0002 RelocTableEntry 3002
+------------------------------------------------------------
+ImageBase 01120000 ImageSize 00480000 IATAddress 6AA6CCD5 IATSize 0x4
+0001 AddrVA 0142F23F Type JMP Value 771FEB60 IatRefPointer 6AA6CCD9 Api advapi32.dll GetUserNameA
+------------------------------------------------------------
+Relocation direct imports fix: Base RVA 00480000 Type HIGHLOW Offset 0002 RelocTableEntry 3002

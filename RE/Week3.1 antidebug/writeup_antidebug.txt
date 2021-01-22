@@ -1,0 +1,97 @@
+
+
+	
+		
+
+Sau khi vượt qua hết antidebug dưới sẽ ra đoạn chuỗi cần nhập:
+  I_10v3-y0U__wh3n Y0u=c411..M3 Senor1t4		
+			
+Run chương trình với Admin và nhập sẽ ra flag:
+  vcstraining{Th3_U1tiM4t3_ant1_D3Bu9_ref3r3ncE}
+
+
+
+follow program callback
+	
+	-> hàm check có 7 trường hợp (7 antidebug)
+	-> bypass TLS callback	
+	
+
+	
+TLS callback{
+  callback run before entry run
+	->anti debug 
+}
+
+
+check6(){
+	c1 = user32.dll!BlockInput()
+	c2 = user32.dll!BlockInput()
+	if(c1 == c2){
+		printf("is debug");
+	}
+}	
+
+
+
+check4,5(){
+	check some thing in heap
+
+}
+
+
+check1(){
+	c1 = kernel32.dll!GetVersion()
+	if(byte(c1) == 6){
+		printf("is debug");
+	}
+	ProcessHeap = [fs[0x30] + 0x18]
+	flags = [ProcessHeap + offset]
+	if(flags == 0x40000062){
+		printf("is debug");
+	}
+}
+
+check3(){
+	c1 = kernel32.dll!GetVersion()
+	if(byte(c1) == 6){
+		printf("is debug");
+	}
+	ProcessHeap = [fs[0x30] + 0x18]
+	ForceFlags = [ProcessHeap + offset]
+	if(ForceFLags){
+		printf("is debug");
+	}
+
+
+}
+
+
+check1(){
+	a = NtGlobalFlag
+	if (a == 0x70){
+		printf("is debug");
+	}
+	
+}
+
+check7(){
+	flag : 
+		- ProcessDebugPort 0x7
+		- ProcessDebugObjectHandle 0x1e
+		- ProcessDebugFlags 0x1f
+		- ProcessBasicInformation 0x00
+	ntQueryInformationProcess(-1,ProcessDebugFlags,&a,4,0)
+	
+
+}
+	
+
+flag : 
+case 2 -> call block input ,set global var -> case 6
+6  1  7  1  3  2  4  3  6  3  7  6  1  4  7  4  1  5  7  6  7  5  6  4  5  1  7  5  2  3  1  2  3  2  1  6  2  4
+5b db 9d c6 A7 5a 8A f6 0D a5 da 74 e9 cf 58 96	5b 5a d0 fc 25 f6 54 b8 6e cc 7a 3f a4 1e 73 3f 10 e7 f1 21 b6 e8
+0E EB F3 F6 D1 6B A7 8F 3D 91 85 2B 86 A7 6B DB 7B 6E 89 89 18 95 67 CA 5F E2 54 0E D3 3E 20 5A 7E D4 B8 10 C2 B7
+
+	
+	
